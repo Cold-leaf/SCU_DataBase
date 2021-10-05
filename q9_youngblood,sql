@@ -1,0 +1,5 @@
+select regiondescription,firstname,lastname,max(birthdate) 
+from region,employee,employeeterritory,territory 
+where region.id=regionid and territory.id=territoryid and employeeid=employee.id 
+group by regiondescription 
+order by regionid ;
