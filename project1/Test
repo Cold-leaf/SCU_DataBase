@@ -1,0 +1,47 @@
+//测试代码
+
+//如GetColumnCount()、SetElement()、GetElement()等这些函数包含在运算函数里，所以未进行单独测试
+
+#include<iostream>
+#include"scudb.h"
+
+using namespace std;
+
+int main()
+{
+	//m1矩阵
+	double b1[6] = { 3,1,2,1,5,2 };
+	vector<double>a1(b1, b1 + 6);
+	scudb::RowMatrix<double> m1(2, 3); 
+	m1.FillFrom(a1);
+	m1.show();
+	cout << endl;
+
+
+	//m2矩阵
+	double b2[6] = { 2,1,4,1,2,1 };
+	vector<double>a2(b2, b2 + 6);
+	scudb::RowMatrix<double> m2(3, 2);
+	m2.FillFrom(a2);
+	m2.show();
+	cout << endl;
+
+	//m3矩阵
+	double b3[4] = { 2,1,4,1 };
+	vector<double>a3(b3, b3 + 4);
+	scudb::RowMatrix<double> m3(2, 2);
+	m3.FillFrom(a3);
+	m3.show();
+	cout << endl;
+
+	//运算
+	scudb::RowMatrixOperations<double> Op;
+	Op.Multiply(&m1, &m2);
+	cout <<  endl;
+
+	Op.Add(&m2, &m3);
+	cout <<  endl;
+
+	Op.GEMM(&m1, &m2, &m3);
+	cout <<  endl;
+}

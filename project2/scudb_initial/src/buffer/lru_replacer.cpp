@@ -1,0 +1,125 @@
+/**
+ * LRU implementation
+ */
+#include "buffer/lru_replacer.h"
+#include "page/page.h"
+
+namespace scudb  {
+
+    template <typename T> LRUReplacer<T>::LRUReplacer() : size_(0)
+    {
+        head_ = new node();
+        tail_ = head_;
+    }
+
+    template <typename T> LRUReplacer<T>::~LRUReplacer() = default;
+
+    /*
+     * Insert value into LRU
+     */
+    template <typename T> void LRUReplacer<T>::Insert(const T &value)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+
+        auto it = table_.find(value);
+        if(it == table_.end())      // 不存在
+        {
+            tail_->next = new node(value, tail_);
+            tail_ = tail_->next;
+            table_.emplace(value, tail_);
+            ++size_;
+        }
+        else                        // 已存在则移至队尾
+        {
+            // 判断对应指针是否已是队尾，是就不用重新操作指针
+            if(it->second != tail_)
+            {
+                // 从原位置移除
+                node *pre = it->second->pre;
+                node *cur = pre->next;
+                pre->next = std::move(cur->next);
+                pre->next->pre = pre;
+
+                // 放到尾部
+                cur->pre = tail_;
+                tail_->next = std::move(cur);
+                tail_ = tail_->next;
+            }
+        }
+    }
+
+    /* If LRU is non-empty, pop the head member from LRU to argument "value", and
+     * return true. If LRU is empty, return false
+     */
+    template <typename T> bool LRUReplacer<T>::Victim(T &value)     //  删除队首给value
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        // 无元素
+        if(size_ == 0)
+        {
+            return false;
+        }
+
+
+        value = head_->next->data;
+        head_->next = head_->next->next;
+        if(head_->next != nullptr)
+        {
+            //delete head_->next->pre; why not??
+            head_->next->pre = head_;
+        }
+
+        table_.erase(value);
+        if(--size_ == 0) {
+            tail_ = head_;
+        }
+
+        return true;
+    }
+
+    /*
+     * Remove value from LRU. If removal is successful, return true, otherwise
+     * return false
+     */
+    template <typename T> bool LRUReplacer<T>::Erase(const T &value)    //  找到value删除
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+
+        auto it = table_.find(value);
+        if(it != table_.end())
+        {
+            if(it->second != tail_)
+            {
+                node *pre = it->second->pre;
+                node *cur = pre->next;
+                pre->next = std::move(cur->next);
+                pre->next->pre = pre;
+            }
+            else
+            {
+                tail_ = tail_->pre;
+                delete tail_->next;
+            }
+
+            table_.erase(value);
+            if(--size_ == 0)
+            {
+                tail_ = head_;
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    template <typename T> size_t LRUReplacer<T>::Size() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return size_;
+    }
+
+
+    template class LRUReplacer<Page *>;
+    // test only
+    template class LRUReplacer<int>;
+
+} // namespace scudb
