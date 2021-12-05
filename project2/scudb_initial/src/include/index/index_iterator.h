@@ -13,18 +13,23 @@ namespace scudb {
 INDEX_TEMPLATE_ARGUMENTS
 class IndexIterator {
 public:
-  // you may define your own constructor based on your member variables
-  IndexIterator();
-  ~IndexIterator();
+    // you may define your own constructor based on your member variables
+    IndexIterator(BPlusTreeLeafPage<KeyType, ValueType, KeyComparator> *,
+                  int, BufferPoolManager *);
 
-  bool isEnd();
+    ~IndexIterator();
 
-  const MappingType &operator*();
+    bool isEnd();
 
-  IndexIterator &operator++();
+    const MappingType &operator*();
+
+    IndexIterator &operator++();
 
 private:
-  // add your own private member variables here
+    // add your own private member variables here
+    BPlusTreeLeafPage<KeyType, ValueType, KeyComparator> *leaf_;
+    int index_;
+    BufferPoolManager *buff_pool_manager_;
 };
 
 } // namespace scudb

@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/lyz/scudb_initial/src -I/home/lyz/scudb_initial/src/include -I/home/lyz/scudb_initial/test/include -I/home/lyz/scudb_initial/third_party -isystem /home/lyz/scudb_initial/third_party/gmock
 
-CXX_FLAGS =  -std=c++1y -D__VTableFILE__='"$(subst /home/lyz/scudb_initial/,,$(abspath $<))"' -fPIC -Wall -Wextra -Werror -Wno-uninitialized -march=native -Wno-unused-parameter   -O0 -ggdb -fno-omit-frame-pointer -fno-optimize-sibling-calls   -Wno-error=deprecated-copy
+CXX_FLAGS =  -std=c++1y -D__VTableFILE__='"$(subst /home/lyz/scudb_initial/,,$(abspath $<))"' -fPIC -Wall -Wextra -Werror -Wno-uninitialized -march=native -Wno-unused-parameter   -O0 -ggdb -fno-omit-frame-pointer -fno-optimize-sibling-calls
 
